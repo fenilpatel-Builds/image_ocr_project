@@ -1,0 +1,20 @@
+{
+  "name": "ocr-intelligence-platform",
+  "version": "1.0.0",
+  "description": "Production-grade Document Upload, Image Preprocessing, Local Tesseract.js OCR & Structured Data Extraction Platform",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "start": "node server/index.js",
+    "server": "npm run dev --prefix server",
+    "client": "npm run dev --prefix client",
+    "test": "node server/tests/run-tests.js",
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "jimp": "^0.22.12"
+  },
+  "author": "Harshit",
+  "license": "MIT"
+}

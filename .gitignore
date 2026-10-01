@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Production build outputs
+dist/
+client/dist/
+
+# Environment and local config
+.env
+.env.local
+.env.*.local
+
+# Logs and runtime caches
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+.system_generated/
+
+# SQLite databases & temp uploads
+*.sqlite
+*.sqlite-journal
+server/storage/uploads/*
+!server/storage/uploads/.gitkeep
+server/data/*.sqlite
+server/data/*.sqlite-journal
+
+# Temporary scratch and debug scripts
+scratch/
+
+# OS metadata
+.DS_Store
+Thumbs.db
