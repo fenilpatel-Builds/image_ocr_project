@@ -32,7 +32,7 @@ export function App() {
   const [previewUrl, setPreviewUrl] = useState(null);
 
   // OCR & Deep Extraction State
-  const [ocrLanguage, setOcrLanguage] = useState('guj+eng');
+  const [ocrLanguage, setOcrLanguage] = useState('hin+guj+eng');
   const [isProcessing, setIsProcessing] = useState(false);
   const [progressState, setProgressState] = useState({ progress: 0, message: 'Initializing local engine...' });
   const [rawOcrText, setRawOcrText] = useState('');
@@ -107,12 +107,17 @@ export function App() {
       recordId = uploadRes.document.id;
       setDocRecordId(recordId);
 
-      // 2. Client-side Image Preprocessing on Canvas with Adaptive Super-Resolution Upscaling
-      setProgressState({ progress: 0.25, message: 'Adaptive Canvas super-resolution & normalization...' });
+      // 2. Client-side Image Preprocessing on Canvas with Adaptive Super-Resolution & Camera Denoising
+      const isCameraImage = file.name && file.name.includes('camera_scan');
+      setProgressState({ 
+        progress: 0.25, 
+        message: isCameraImage ? 'Adaptive camera contrast enhancement & denoising...' : 'Adaptive Canvas super-resolution & normalization...' 
+      });
       const preprocessed = await runPreprocessingPipeline(file, {
         grayscale: true,
-        contrast: 1.08,
-        sharpen: false,
+        contrast: isCameraImage ? 1.15 : 1.08,
+        denoise: isCameraImage,
+        sharpen: isCameraImage,
         autoDeskew: false
       });
 
@@ -656,7 +661,7 @@ export function App() {
                     {extractedFields.length} Fields • {paragraphs.length} Paragraphs • {textLines.length} Lines
                   </span>
                   <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f766e', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '4px 10px', borderRadius: '8px' }}>
-                    {ocrLanguage === 'guj+eng' ? '🌐 ગુજરાતી + English' : ocrLanguage === 'guj' ? '🇮🇳 ગુજરાતી' : ocrLanguage === 'hin+eng' ? '🇮🇳 हिन्दी + Eng' : '🇬🇧 English'}
+                    {ocrLanguage === 'hin+guj+eng' ? '🌐 हिन्दी + ગુજરાતી + English' : ocrLanguage === 'hin+eng' ? '🇮🇳 हिन्दी + English' : ocrLanguage === 'guj+eng' ? '🌐 ગુજરાતી + English' : ocrLanguage === 'hin' ? '🇮🇳 हिन्दी' : ocrLanguage === 'guj' ? '🇮🇳 ગુજરાતી' : '🇬🇧 English'}
                   </span>
                 </div>
               </div>

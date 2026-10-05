@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { FolderOpen, CheckCircle2, AlertCircle, RefreshCw, X, Image as ImageIcon, FileText, ArrowRight, Sparkles } from 'lucide-react';
-import { generateSampleGujaratiBill } from '../ocr/syntheticSamples';
+import { FolderOpen, CheckCircle2, AlertCircle, RefreshCw, X, Image as ImageIcon, FileText, ArrowRight, Sparkles, Camera } from 'lucide-react';
+import { generateSampleGujaratiBill, generateSampleHindiBill } from '../ocr/syntheticSamples';
+import { CameraModal } from './CameraModal';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.pdf'];
@@ -16,7 +17,7 @@ export function DocumentUpload({
   onFileSelected, 
   onProcess, 
   isProcessing,
-  ocrLanguage = 'guj+eng',
+  ocrLanguage = 'hin+guj+eng',
   onLanguageChange
 }) {
   const fileInputRef = useRef(null);
@@ -24,6 +25,7 @@ export function DocumentUpload({
   const [selectedFile, setSelectedFile] = useState(null);
   const [validationError, setValidationError] = useState(null);
   const [isLoadingSample, setIsLoadingSample] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
 
   // Validate file against format and size constraints
   const validateFile = (file) => {
@@ -112,6 +114,21 @@ export function DocumentUpload({
     }
   };
 
+  const handleLoadHindiSample = async (e) => {
+    if (e) e.stopPropagation();
+    try {
+      setIsLoadingSample(true);
+      const sampleFile = await generateSampleHindiBill();
+      setSelectedFile(sampleFile);
+      if (onLanguageChange) onLanguageChange('hin+eng');
+      if (onFileSelected) onFileSelected(sampleFile);
+    } catch (err) {
+      console.error('Failed to generate Hindi sample bill:', err);
+    } finally {
+      setIsLoadingSample(false);
+    }
+  };
+
   const handleClearFile = (e) => {
     if (e) e.stopPropagation();
     setSelectedFile(null);
@@ -140,10 +157,10 @@ export function DocumentUpload({
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
       
       {/* Header section matching reference mockup */}
-      <span className="doc-section-label">DOCUMENT UPLOAD</span>
-      <h1 className="doc-main-heading">Upload Your Document</h1>
+      <span className="doc-section-label">DOCUMENT UPLOAD & MULTILINGUAL SCAN</span>
+      <h1 className="doc-main-heading">Upload or Scan Your Document</h1>
       <p className="doc-sub-text">
-        Drag and drop your file here, or choose from your device. Supports English and Gujarati (ગુજરાતી) documents.
+        Drag and drop your file, capture with camera, or choose from device. Full multilingual support for Hindi (हिन्दी), Gujarati (ગુજરાતી), and English.
       </p>
 
       {/* OCR Language & Fast Sample Action Bar */}
@@ -161,10 +178,10 @@ export function DocumentUpload({
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>
-            OCR Engine Language:
+            OCR Language:
           </span>
           <select
-            value={ocrLanguage || 'guj+eng'}
+            value={ocrLanguage || 'hin+guj+eng'}
             onChange={(e) => onLanguageChange && onLanguageChange(e.target.value)}
             disabled={isProcessing}
             style={{
@@ -179,36 +196,64 @@ export function DocumentUpload({
               outline: 'none'
             }}
           >
-            <option value="guj+eng">🌐 ગુજરાતી + English (Bilingual - Best Accuracy)</option>
+            <option value="hin+guj+eng">🌐 हिन्दी + ગુજરાતી + English (Trilingual - Recommended)</option>
+            <option value="hin+eng">🇮🇳 हिन्दी + English (Bilingual)</option>
+            <option value="guj+eng">🌐 ગુજરાતી + English (Bilingual)</option>
+            <option value="hin">🇮🇳 हिन्दी मात्र (Hindi Only)</option>
             <option value="guj">🇮🇳 ગુજરાતી માત્ર (Gujarati Only)</option>
             <option value="eng">🇬🇧 English Only</option>
-            <option value="hin+eng">🇮🇳 हिन्दी + English (Hindi + English)</option>
           </select>
         </div>
 
-        <button
-          type="button"
-          onClick={handleLoadGujaratiSample}
-          disabled={isProcessing || isLoadingSample}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '7px 14px',
-            borderRadius: '8px',
-            border: '1.5px solid #16a34a',
-            background: '#f0fdf4',
-            color: '#15803d',
-            fontSize: '13px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-          }}
-          title="Load pre-rendered Gujarati Retail Tax Invoice to test OCR scanning immediately"
-        >
-          <Sparkles size={14} color="#16a34a" />
-          <span>{isLoadingSample ? 'Generating Bill...' : 'Try Sample Gujarati Bill (ગુજરાતી બિલ)'}</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={handleLoadHindiSample}
+            disabled={isProcessing || isLoadingSample}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '7px 14px',
+              borderRadius: '8px',
+              border: '1.5px solid #3b82f6',
+              background: '#eff6ff',
+              color: '#1d4ed8',
+              fontSize: '13px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            title="Load pre-rendered Hindi Retail Tax Invoice to test OCR scanning immediately"
+          >
+            <Sparkles size={14} color="#2563eb" />
+            <span>{isLoadingSample ? 'Generating...' : 'Try Hindi Bill (हिन्दी बिल)'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleLoadGujaratiSample}
+            disabled={isProcessing || isLoadingSample}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '7px 14px',
+              borderRadius: '8px',
+              border: '1.5px solid #16a34a',
+              background: '#f0fdf4',
+              color: '#15803d',
+              fontSize: '13px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            title="Load pre-rendered Gujarati Retail Tax Invoice to test OCR scanning immediately"
+          >
+            <Sparkles size={14} color="#16a34a" />
+            <span>{isLoadingSample ? 'Generating...' : 'Try Gujarati Bill (ગુજરાતી)'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Real Hidden File Input (Strictly Invisible) */}
@@ -288,7 +333,7 @@ export function DocumentUpload({
               or choose from your device
             </div>
 
-            {/* Single Primary Browse Button & Gujarati Sample */}
+            {/* Primary Action Buttons: Browse, Camera Scan, Hindi Sample, Gujarati Sample */}
             <div className="doc-btn-group" onClick={(e) => e.stopPropagation()}>
               <button
                 type="button"
@@ -301,12 +346,31 @@ export function DocumentUpload({
 
               <button
                 type="button"
+                className="btn-camera"
+                onClick={() => setIsCameraOpen(true)}
+              >
+                <Camera size={16} color="#2563eb" />
+                <span>Scan with Camera</span>
+              </button>
+
+              <button
+                type="button"
+                className="btn-sample-hin"
+                onClick={handleLoadHindiSample}
+                disabled={isLoadingSample}
+              >
+                <Sparkles size={16} color="#1d4ed8" />
+                <span>Sample Hindi Bill</span>
+              </button>
+
+              <button
+                type="button"
                 className="btn-sample-guj"
                 onClick={handleLoadGujaratiSample}
                 disabled={isLoadingSample}
               >
                 <Sparkles size={16} color="#15803d" />
-                <span>Sample Gujarati Bill (ગુજરાતી)</span>
+                <span>Sample Gujarati Bill</span>
               </button>
             </div>
 
@@ -370,7 +434,24 @@ export function DocumentUpload({
                 <span>•</span>
                 <span style={{ color: '#16a34a', fontWeight: 600 }}>Ready to Process</span>
               </div>
-              <div style={{ marginTop: '8px' }}>
+              <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                {selectedFile.name.includes('camera_scan') && (
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '3px 10px',
+                    borderRadius: '20px',
+                    background: '#eff6ff',
+                    border: '1px solid #bfdbfe',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#1d4ed8'
+                  }}>
+                    <Camera size={13} />
+                    <span>Captured with Camera</span>
+                  </span>
+                )}
                 <span style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -384,7 +465,7 @@ export function DocumentUpload({
                   color: '#15803d'
                 }}>
                   <span>Language:</span>
-                  <strong>{ocrLanguage === 'guj+eng' ? '🌐 ગુજરાતી + English (Bilingual)' : ocrLanguage === 'guj' ? '🇮🇳 ગુજરાતી માત્ર' : ocrLanguage === 'hin+eng' ? '🇮🇳 हिन्दी + English' : '🇬🇧 English'}</strong>
+                  <strong>{ocrLanguage === 'hin+guj+eng' ? '🌐 हिन्दी + ગુજરાતી + English' : ocrLanguage === 'hin+eng' ? '🇮🇳 हिन्दी + English' : ocrLanguage === 'guj+eng' ? '🌐 ગુજરાતી + English' : ocrLanguage === 'hin' ? '🇮🇳 हिन्दी' : ocrLanguage === 'guj' ? '🇮🇳 ગુજરાતી' : '🇬🇧 English'}</strong>
                 </span>
               </div>
             </div>
@@ -427,6 +508,18 @@ export function DocumentUpload({
           </div>
         )}
       </div>
+
+      {/* Direct Device Camera Scanner Modal */}
+      <CameraModal
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onCapture={(capturedFile) => {
+          if (validateFile(capturedFile)) {
+            setSelectedFile(capturedFile);
+            if (onFileSelected) onFileSelected(capturedFile);
+          }
+        }}
+      />
 
     </div>
   );

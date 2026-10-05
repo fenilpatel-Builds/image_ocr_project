@@ -47,7 +47,8 @@ const CLASSIFIERS = [
         'OPENING BALANCE', 'CLOSING BALANCE', 'AVAILABLE BALANCE',
         'TOTAL CREDITS', 'TOTAL DEBITS', 'TRANSACTION HISTORY',
         'ACCOUNT NUMBER', 'A/C NO', 'WITHDRAWAL', 'DEPOSIT', 'STATEMENT PERIOD',
-        'સ્ટેટમેન્ટ', 'ખાતા વિગત', 'બેંક સ્ટેટમેન્ટ', 'જમા', 'ઉધાર', 'બાકી રકમ', 'ખાતા નંબર'
+        'સ્ટેટમેન્ટ', 'ખાતા વિગત', 'બેંક સ્ટેટમેન્ટ', 'જમા', 'ઉધાર', 'બાકી રકમ', 'ખાતા નંબર',
+        'स्टेटमेंट', 'खाता विवरण', 'बैंक स्टेटमेंट', 'जमा', 'निकासी', 'बकाया राशि', 'खाता संख्या'
       ];
 
       keywords.forEach(kw => {
@@ -72,7 +73,8 @@ const CLASSIFIERS = [
         'PURCHASE ORDER', 'P.O. NUMBER', 'PO NUMBER', 'P.O. NO',
         'ORDER DATE', 'SALES ORDER', 'ORDER NUMBER', 'SHIP TO',
         'VENDOR', 'DELIVERY DATE', 'ITEM DESCRIPTION', 'ORDERED BY',
-        'ઓર્ડર', 'આદેશ', 'ખરીદ આદેશ', 'ઓર્ડર નંબર', 'ઓર્ડર તારીખ'
+        'ઓર્ડર', 'આદેશ', 'ખરીદ આદેશ', 'ઓર્ડર નંબર', 'ઓર્ડર તારીખ',
+        'ऑर्डर', 'आदेश', 'क्रय आदेश', 'खरीद आदेश', 'ऑर्डर संख्या', 'ऑर्डर दिनांक'
       ];
 
       keywords.forEach(kw => {
@@ -96,13 +98,15 @@ const CLASSIFIERS = [
       const strongKeywords = [
         'INVOICE', 'TAX INVOICE', 'BILL TO', 'INVOICE NUMBER',
         'INV NO', 'INVOICE DATE', 'DUE DATE', 'SUBTOTAL', 'GSTIN', 'VAT NO',
-        'બિલ', 'ઇન્વોઇસ', 'કર ઇન્વોઇસ', 'જીએસટી', 'કુલ રકમ'
+        'બિલ', 'ઇન્વોઇસ', 'કર ઇન્વોઇસ', 'જીએસટી', 'કુલ રકમ',
+        'इनवॉइस', 'कर इनवॉइस', 'बिल', 'कैश मेमो', 'चालान', 'कुल राशि', 'जीएसटी'
       ];
 
       const secondaryKeywords = [
         'TOTAL AMOUNT', 'BALANCE DUE', 'QUANTITY', 'UNIT PRICE',
         'RATE', 'HSN', 'TAXABLE AMOUNT', 'DISCOUNT', 'TERMS & CONDITIONS',
-        'પેટા કુલ', 'કરપાત્ર રકમ', 'વળતર', 'ચુકવણી'
+        'પેટા કુલ', 'કરપાત્ર રકમ', 'વળતર', 'ચુકવણી',
+        'उप-योग', 'कर योग्य राशि', 'छूट', 'भुगतान'
       ];
 
       strongKeywords.forEach(kw => {
@@ -134,7 +138,8 @@ const CLASSIFIERS = [
         'RECEIPT', 'CASHIER', 'CHANGE DUE', 'TOTAL',
         'SUBTOTAL', 'STORE #', 'TERMINAL', 'ITEMS',
         'CASH', 'CREDIT CARD', 'VISA', 'MASTERCARD', 'THANK YOU FOR SHOPPING',
-        'રસીદ', 'પહોંચ', 'કેશિયર', 'રોકડ', 'દુકાન', 'સુપર સ્ટોર', 'ગ્રાહક'
+        'રસીદ', 'પહોંચ', 'કેશિયર', 'રોકડ', 'દુકાન', 'સુપર સ્ટોર', 'ગ્રાહક',
+        'रसीद', 'पावती', 'कैशियर', 'रोकड़', 'दुकान', 'सुपरमार्ट', 'ग्राहक'
       ];
 
       keywords.forEach(kw => {

@@ -33,8 +33,15 @@ class TesseractOCRService {
     }
 
     this.isInitializing = true;
+    let langLabel = language;
+    if (language === 'hin+guj+eng') langLabel = 'Hindi (हिन्दी) + Gujarati (ગુજરાતી) + English';
+    else if (language === 'hin+eng') langLabel = 'Hindi (हिन्दी) + English';
+    else if (language === 'guj+eng') langLabel = 'Gujarati (ગુજરાતી) + English';
+    else if (language === 'hin') langLabel = 'Hindi (हिन्दी)';
+    else if (language === 'guj') langLabel = 'Gujarati (ગુજરાતી)';
+    else if (language === 'eng') langLabel = 'English';
+
     if (onProgress) {
-      const langLabel = language.includes('guj') ? 'Gujarati (ગુજરાતી) + English' : language;
       onProgress({ status: 'initializing', progress: 0.1, message: `Loading Tesseract ${langLabel} engine...` });
     }
 
@@ -46,12 +53,10 @@ class TesseractOCRService {
             let userMessage = m.status;
             if (m.status === 'loading tesseract core') userMessage = 'Loading WebAssembly OCR core...';
             else if (m.status === 'loading language traineddata') {
-              userMessage = language.includes('guj') 
-                ? 'Loading Gujarati (ગુજરાતી) & English OCR language models...' 
-                : `Loading ${language} language model...`;
+              userMessage = `Loading ${langLabel} language models...`;
             }
             else if (m.status === 'initializing api') userMessage = 'Initializing local OCR engine...';
-            else if (m.status === 'recognizing text') userMessage = 'Recognizing Gujarati & alphanumeric text patterns...';
+            else if (m.status === 'recognizing text') userMessage = `Recognizing ${langLabel} text patterns...`;
 
             onProgress({
               status: m.status,

@@ -529,3 +529,125 @@ export async function generateSampleGujaratiBill() {
 
   return await canvasToFile(canvas, 'sample_gujarati_invoice_bill.jpg');
 }
+
+// 6. Synthetic Hindi Retail Bill / रसीद / कैश मेमो
+export async function generateSampleHindiBill() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1100;
+  canvas.height = 1450;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Top header bar
+  ctx.fillStyle = '#1e3a8a';
+  ctx.fillRect(0, 0, canvas.width, 16);
+
+  // Store Name in Hindi
+  ctx.fillStyle = '#1e3a8a';
+  ctx.font = 'bold 44px sans-serif';
+  ctx.fillText('श्री कृष्णा सुपरमार्ट', 60, 95);
+
+  ctx.fillStyle = '#334155';
+  ctx.font = '20px sans-serif';
+  ctx.fillText('कर इनवॉइस / कैश मेमो (Retail Tax Invoice)', 60, 135);
+  ctx.fillText('१५, महात्मा गांधी मार्ग, सिविल लाइंस, जयपुर - ३०२००१', 60, 168);
+  ctx.fillText('मोबाइल: 98290 54321 | ईमेल: contact@krishnamart.in', 60, 200);
+  ctx.fillText('जीएसटी नं (GSTIN): 08AABCS9876C1Z4', 60, 232);
+
+  // Metadata box
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(700, 70, 340, 175);
+
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.fillText('बिल संख्या:', 720, 115);
+  ctx.font = '18px sans-serif';
+  ctx.fillText('SK-2026-4409', 840, 115);
+
+  ctx.font = 'bold 18px sans-serif';
+  ctx.fillText('दिनांक:', 720, 165);
+  ctx.font = '18px sans-serif';
+  ctx.fillText('05/10/2026', 840, 165);
+
+  ctx.font = 'bold 18px sans-serif';
+  ctx.fillText('समय:', 720, 215);
+  ctx.font = '18px sans-serif';
+  ctx.fillText('16:20:45', 840, 215);
+
+  // Customer line
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(60, 270, 980, 60);
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.strokeRect(60, 270, 980, 60);
+
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 20px sans-serif';
+  ctx.fillText('ग्राहक का नाम:', 80, 308);
+  ctx.font = '20px sans-serif';
+  ctx.fillText('राजेश कुमार शर्मा (Rajesh Kumar Sharma)', 230, 308);
+
+  // Table header
+  ctx.fillStyle = '#1e3a8a';
+  ctx.fillRect(60, 360, 980, 50);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 19px sans-serif';
+  ctx.fillText('क्र.सं.', 80, 392);
+  ctx.fillText('विवरण (Item Description)', 160, 392);
+  ctx.fillText('मात्रा (Qty)', 660, 392);
+  ctx.fillText('दर (Rate)', 790, 392);
+  ctx.fillText('राशि (Total)', 930, 392);
+
+  // Items in Hindi
+  const items = [
+    { no: '१', name: 'सरसों का तेल (१ लीटर)', qty: '१', rate: '१४५.००', total: '१४५.००' },
+    { no: '२', name: 'प्रीमियम चाय पत्ती (५०० ग्राम)', qty: '२', rate: '२२०.००', total: '४४०.००' },
+    { no: '૩', name: 'बासमती चावल (५ किलो)', qty: '१', rate: '४८०.००', total: '४८०.००' },
+    { no: '४', name: 'देसी गाय का घी (१ किलो)', qty: '૧', rate: '૬૫૦.૦૦', total: '૬૫૦.૦૦' }
+  ];
+
+  let y = 445;
+  items.forEach((it, idx) => {
+    ctx.fillStyle = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+    ctx.fillRect(60, y - 30, 980, 48);
+
+    ctx.fillStyle = '#0f172a';
+    ctx.font = '18px sans-serif';
+    ctx.fillText(it.no, 85, y);
+    ctx.fillText(it.name, 160, y);
+    ctx.fillText(it.qty, 690, y);
+    ctx.fillText('₹ ' + it.rate, 790, y);
+    ctx.fillText('₹ ' + it.total, 930, y);
+
+    y += 50;
+  });
+
+  // Totals box
+  y += 20;
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.strokeRect(600, y, 440, 180);
+
+  ctx.fillStyle = '#334155';
+  ctx.font = '18px sans-serif';
+  ctx.fillText('उप-योग (Subtotal):', 630, y + 40);
+  ctx.fillText('₹ १७१५.००', 930, y + 40);
+
+  ctx.fillText('जीएसटी (GST 5%):', 630, y + 85);
+  ctx.fillText('₹ ८५.७५', 930, y + 85);
+
+  ctx.fillStyle = '#1e3a8a';
+  ctx.font = 'bold 22px sans-serif';
+  ctx.fillText('कुल राशि (Grand Total):', 630, y + 145);
+  ctx.fillText('₹ १८००.७५', 910, y + 145);
+
+  // Footer greeting in Hindi
+  ctx.fillStyle = '#475569';
+  ctx.font = 'italic 18px sans-serif';
+  ctx.fillText('धन्यवाद! पुनः पधारें । आपका दिन शुभ और मंगलमय हो ।', 260, y + 260);
+
+  return await canvasToFile(canvas, 'sample_hindi_invoice_bill.jpg');
+}
