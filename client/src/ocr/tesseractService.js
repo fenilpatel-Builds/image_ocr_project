@@ -21,7 +21,7 @@ class TesseractOCRService {
   /**
    * Retrieves or initializes the cached Tesseract worker for the requested language
    */
-  async getWorker(language = 'guj+eng', onProgress = null) {
+  async getWorker(language = 'hin+guj+eng', onProgress = null) {
     // If worker exists for the same language, reuse it directly!
     if (this.worker && this.currentLanguage === language) {
       return this.worker;
@@ -81,7 +81,7 @@ class TesseractOCRService {
   /**
    * Run local OCR on an image source (Canvas, Blob, or URL)
    */
-  async recognize(imageSource, { language = 'guj+eng', onProgress = null } = {}) {
+  async recognize(imageSource, { language = 'hin+guj+eng', onProgress = null } = {}) {
     const startTime = performance.now();
 
     const worker = await this.getWorker(language, onProgress);

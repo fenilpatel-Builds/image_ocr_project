@@ -31,8 +31,8 @@ export function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
-  // OCR & Deep Extraction State
-  const [ocrLanguage, setOcrLanguage] = useState('hin+guj+eng');
+  // OCR & Deep Extraction State (Auto Multilingual: Hindi + Gujarati + English)
+  const ocrLanguage = 'hin+guj+eng';
   const [isProcessing, setIsProcessing] = useState(false);
   const [progressState, setProgressState] = useState({ progress: 0, message: 'Initializing local engine...' });
   const [rawOcrText, setRawOcrText] = useState('');
@@ -561,8 +561,6 @@ export function App() {
             onFileSelected={handleFileSelected}
             onProcess={startProcessing}
             isProcessing={isProcessing}
-            ocrLanguage={ocrLanguage}
-            onLanguageChange={setOcrLanguage}
           />
         )}
 
@@ -660,8 +658,8 @@ export function App() {
                   <span style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', background: '#f1f5f9', padding: '4px 10px', borderRadius: '8px' }}>
                     {extractedFields.length} Fields • {paragraphs.length} Paragraphs • {textLines.length} Lines
                   </span>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f766e', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '4px 10px', borderRadius: '8px' }}>
-                    {ocrLanguage === 'hin+guj+eng' ? '🌐 हिन्दी + ગુજરાતી + English' : ocrLanguage === 'hin+eng' ? '🇮🇳 हिन्दी + English' : ocrLanguage === 'guj+eng' ? '🌐 ગુજરાતી + English' : ocrLanguage === 'hin' ? '🇮🇳 हिन्दी' : ocrLanguage === 'guj' ? '🇮🇳 ગુજરાતી' : '🇬🇧 English'}
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#4338ca', background: '#e0e7ff', border: '1px solid #c7d2fe', padding: '4px 12px', borderRadius: '8px' }}>
+                    🌐 Auto Multilingual (English • ગુજરાતી • हिन्दी)
                   </span>
                 </div>
               </div>

@@ -651,3 +651,129 @@ export async function generateSampleHindiBill() {
 
   return await canvasToFile(canvas, 'sample_hindi_invoice_bill.jpg');
 }
+
+// 7. Synthetic Trilingual Bill (English + Gujarati + Hindi all in one document)
+export async function generateSampleTrilingualBill() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1100;
+  canvas.height = 1500;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Top header bar (gradient-like modern indigo)
+  ctx.fillStyle = '#4338ca';
+  ctx.fillRect(0, 0, canvas.width, 16);
+
+  // Trilingual Store Name Header
+  ctx.fillStyle = '#1e1b4b';
+  ctx.font = 'bold 36px sans-serif';
+  ctx.fillText('SHREE BALAJI MULTI-MART', 60, 85);
+
+  ctx.fillStyle = '#4338ca';
+  ctx.font = 'bold 26px sans-serif';
+  ctx.fillText('શ્રી બાલાજી સુપરમાર્ટ  •  श्री बालाजी सुपरमार्ट', 60, 125);
+
+  ctx.fillStyle = '#334155';
+  ctx.font = '18px sans-serif';
+  ctx.fillText('Tax Invoice / કર ઇન્વોઇસ / कर इनवॉइस (Retail Cash Memo)', 60, 160);
+  ctx.fillText('Shop 102, Sardar Patel Marg / સરદાર પટેલ રોડ, Ahmedabad - 380009', 60, 190);
+  ctx.fillText('Phone / મો: +91 98251 98765 | Email: balaji@multimart.com', 60, 220);
+  ctx.fillText('GSTIN / જીએસટી: 24AAACB1234F1Z5', 60, 250);
+
+  // Metadata box
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(680, 65, 360, 195);
+
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 16px sans-serif';
+  ctx.fillText('Invoice / બિલ નં / बिल नं:', 700, 105);
+  ctx.font = '16px monospace';
+  ctx.fillText('SBM-2026-9901', 700, 130);
+
+  ctx.font = 'bold 16px sans-serif';
+  ctx.fillText('Date / તારીખ / दिनांक:', 700, 170);
+  ctx.font = '16px monospace';
+  ctx.fillText('05/10/2026', 700, 195);
+
+  ctx.font = 'bold 16px sans-serif';
+  ctx.fillText('Time / સમય / समय:', 700, 225);
+  ctx.font = '16px monospace';
+  ctx.fillText('16:45:20', 840, 225);
+
+  // Customer line with all 3 languages
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(60, 285, 980, 60);
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.strokeRect(60, 285, 980, 60);
+
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.fillText('Customer / ગ્રાહક / ग्राहक:', 80, 322);
+  ctx.font = '18px sans-serif';
+  ctx.fillText('Vikram Patel / વિક્રમ પટેલ (विक्रम पटेल)', 320, 322);
+
+  // Table header
+  ctx.fillStyle = '#4338ca';
+  ctx.fillRect(60, 370, 980, 50);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.fillText('No / ક્રમ', 80, 402);
+  ctx.fillText('Item Description / વિગત / विवरण', 180, 402);
+  ctx.fillText('Qty / જથ્થો', 680, 402);
+  ctx.fillText('Rate / ભાવ', 800, 402);
+  ctx.fillText('Total / રકમ', 930, 402);
+
+  // Items combining English, Gujarati, and Hindi
+  const items = [
+    { no: '1', name: 'Wheat Flour / ઘઉંનો લોટ (गेहूं आटा)', qty: '2', rate: '180.00', total: '360.00' },
+    { no: '2', name: 'Mustard Oil / સરસવનું તેલ (सरसों तेल)', qty: '1', rate: '165.00', total: '165.00' },
+    { no: '3', name: 'Premium Tea / પ્રીમિયમ ચા (चाय पत्ती)', qty: '1', rate: '250.00', total: '250.00' },
+    { no: '4', name: 'Basmati Rice / બાસમતી ચોખા (चावल)', qty: '1', rate: '425.00', total: '425.00' }
+  ];
+
+  let y = 455;
+  items.forEach((it, idx) => {
+    ctx.fillStyle = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+    ctx.fillRect(60, y - 30, 980, 50);
+
+    ctx.fillStyle = '#0f172a';
+    ctx.font = '17px sans-serif';
+    ctx.fillText(it.no, 90, y);
+    ctx.fillText(it.name, 180, y);
+    ctx.fillText(it.qty, 710, y);
+    ctx.fillText('₹ ' + it.rate, 800, y);
+    ctx.fillText('₹ ' + it.total, 930, y);
+
+    y += 52;
+  });
+
+  // Totals box with all three language labels
+  y += 20;
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.strokeRect(580, y, 460, 190);
+
+  ctx.fillStyle = '#334155';
+  ctx.font = '17px sans-serif';
+  ctx.fillText('Subtotal / પેટા કુલ / उप-योग:', 600, y + 42);
+  ctx.fillText('₹ 1200.00', 930, y + 42);
+
+  ctx.fillText('GST (5%) / જીએસટી / जीएसटी:', 600, y + 88);
+  ctx.fillText('₹ 60.00', 930, y + 88);
+
+  ctx.fillStyle = '#4338ca';
+  ctx.font = 'bold 21px sans-serif';
+  ctx.fillText('Grand Total / કુલ રકમ / कुल राशि:', 600, y + 150);
+  ctx.fillText('₹ 1260.00', 910, y + 150);
+
+  // Footer greeting in all 3 languages
+  ctx.fillStyle = '#475569';
+  ctx.font = 'italic 16px sans-serif';
+  ctx.fillText('Thank you for shopping!  •  પધારવા બદલ આભાર!  •  धन्यवाद! पुनः पधारें ।', 200, y + 260);
+
+  return await canvasToFile(canvas, 'sample_trilingual_invoice_bill.jpg');
+}
