@@ -407,3 +407,125 @@ export async function generateSampleIdCard() {
 
   return await canvasToFile(canvas, 'sample_identity_license_card.jpg');
 }
+
+// 5. Synthetic Gujarati Retail Bill / રસીદ
+export async function generateSampleGujaratiBill() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1100;
+  canvas.height = 1450;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Top header bar
+  ctx.fillStyle = '#0f766e';
+  ctx.fillRect(0, 0, canvas.width, 16);
+
+  // Store Name in Gujarati
+  ctx.fillStyle = '#0f766e';
+  ctx.font = 'bold 44px sans-serif';
+  ctx.fillText('શ્રી ગણેશ સુપર સ્ટોર', 60, 95);
+
+  ctx.fillStyle = '#334155';
+  ctx.font = '20px sans-serif';
+  ctx.fillText('કર ઇન્વોઇસ / વેચાણ રસીદ (Tax Invoice)', 60, 135);
+  ctx.fillText('૧૨, સરદાર પટેલ માર્કેટ, સી.જી. રોડ, અમદાવાદ - ૩૮૦૦૦૯', 60, 168);
+  ctx.fillText('મોબાઇલ: 98250 12345 | ઇમેઇલ: shreeganesh@store.in', 60, 200);
+  ctx.fillText('જીએસટી નં (GSTIN): 24AABCS1429B1Z8', 60, 232);
+
+  // Metadata box
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(700, 70, 340, 175);
+
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.fillText('બિલ નંબર:', 720, 115);
+  ctx.font = '18px sans-serif';
+  ctx.fillText('GS-2026-1082', 840, 115);
+
+  ctx.font = 'bold 18px sans-serif';
+  ctx.fillText('તારીખ:', 720, 165);
+  ctx.font = '18px sans-serif';
+  ctx.fillText('05/10/2026', 840, 165);
+
+  ctx.font = 'bold 18px sans-serif';
+  ctx.fillText('સમય:', 720, 215);
+  ctx.font = '18px sans-serif';
+  ctx.fillText('14:35:10', 840, 215);
+
+  // Customer line
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(60, 270, 980, 60);
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.strokeRect(60, 270, 980, 60);
+
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 20px sans-serif';
+  ctx.fillText('ગ્રાહકનું નામ:', 80, 308);
+  ctx.font = '20px sans-serif';
+  ctx.fillText('રમેશભાઈ પટેલ (Rameshbhai Patel)', 210, 308);
+
+  // Table header
+  ctx.fillStyle = '#0f766e';
+  ctx.fillRect(60, 360, 980, 50);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 19px sans-serif';
+  ctx.fillText('ક્રમ', 80, 392);
+  ctx.fillText('વસ્તુ / વિગત (Item Description)', 160, 392);
+  ctx.fillText('જથ્થો (Qty)', 660, 392);
+  ctx.fillText('ભાવ (Rate)', 790, 392);
+  ctx.fillText('રકમ (Total)', 930, 392);
+
+  // Items
+  const items = [
+    { no: '૧', name: 'કપાસિયા તેલ (૧ લિટર)', qty: '૧', rate: '૧૪૦.૦૦', total: '૧૪૦.૦૦' },
+    { no: '૨', name: 'પ્રીમિયમ ચા (૫૦૦ ગ્રામ)', qty: '૨', rate: '૧૪૦.૦૦', total: '૨૮૦.૦૦' },
+    { no: '૩', name: 'બાસમતી ચોખા (૫ કિલો)', qty: '૧', rate: '૪૫૦.૦૦', total: '૪૫૦.૦૦' },
+    { no: '૪', name: 'દેશી ગોળ (૧ કિલો)', qty: '૧', rate: '૬૦.૦૦', total: '૬૦.૦૦' }
+  ];
+
+  let y = 445;
+  items.forEach((it, idx) => {
+    ctx.fillStyle = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+    ctx.fillRect(60, y - 30, 980, 48);
+
+    ctx.fillStyle = '#0f172a';
+    ctx.font = '18px sans-serif';
+    ctx.fillText(it.no, 85, y);
+    ctx.fillText(it.name, 160, y);
+    ctx.fillText(it.qty, 690, y);
+    ctx.fillText('₹ ' + it.rate, 790, y);
+    ctx.fillText('₹ ' + it.total, 930, y);
+
+    y += 50;
+  });
+
+  // Totals box
+  y += 20;
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.strokeRect(600, y, 440, 180);
+
+  ctx.fillStyle = '#334155';
+  ctx.font = '18px sans-serif';
+  ctx.fillText('પેટા કુલ (Subtotal):', 630, y + 40);
+  ctx.fillText('₹ ૯૩૦.૦૦', 930, y + 40);
+
+  ctx.fillText('જીએસટી (GST 5%):', 630, y + 85);
+  ctx.fillText('₹ ૪૬.૫૦', 930, y + 85);
+
+  ctx.fillStyle = '#0f766e';
+  ctx.font = 'bold 22px sans-serif';
+  ctx.fillText('કુલ રકમ (Grand Total):', 630, y + 145);
+  ctx.fillText('₹ ૯૭૬.૫૦', 910, y + 145);
+
+  // Footer greeting in Gujarati
+  ctx.fillStyle = '#475569';
+  ctx.font = 'italic 18px sans-serif';
+  ctx.fillText('પધારવા બદલ આભાર! આપની મુલાકાત અમારા માટે આનંદદાયક છે.', 260, y + 260);
+
+  return await canvasToFile(canvas, 'sample_gujarati_invoice_bill.jpg');
+}

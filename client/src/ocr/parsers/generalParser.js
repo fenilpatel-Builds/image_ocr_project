@@ -48,9 +48,9 @@ export function parseGeneralDocument(rawText, wordTokens = []) {
   const fields = [];
   const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
 
-  // 1. Extract generic Key: Value patterns (e.g. "Reference: #88219")
+  // 1. Extract generic Key: Value patterns (e.g. "Reference: #88219" or "તારીખ: 15/10/2026")
   for (const line of lines) {
-    const kvMatch = line.match(/^([A-Za-z\s]{3,25})[:=]\s*([^\n\r]{2,80})$/);
+    const kvMatch = line.match(/^([A-Za-z\u0A80-\u0AFF\u0900-\u097F\s]{2,35})[:=–—]\s*([^\n\r]{2,100})$/);
     if (kvMatch && !/http|www|page/i.test(kvMatch[1])) {
       const key = kvMatch[1].trim();
       const val = kvMatch[2].trim();

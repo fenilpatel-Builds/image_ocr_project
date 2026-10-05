@@ -21,7 +21,7 @@ class TesseractOCRService {
   /**
    * Retrieves or initializes the cached Tesseract worker for the requested language
    */
-  async getWorker(language = 'eng', onProgress = null) {
+  async getWorker(language = 'guj+eng', onProgress = null) {
     // If worker exists for the same language, reuse it directly!
     if (this.worker && this.currentLanguage === language) {
       return this.worker;
@@ -34,7 +34,8 @@ class TesseractOCRService {
 
     this.isInitializing = true;
     if (onProgress) {
-      onProgress({ status: 'initializing', progress: 0.1, message: `Loading Tesseract ${language} engine...` });
+      const langLabel = language.includes('guj') ? 'Gujarati (ગુજરાતી) + English' : language;
+      onProgress({ status: 'initializing', progress: 0.1, message: `Loading Tesseract ${langLabel} engine...` });
     }
 
     try {
@@ -44,9 +45,13 @@ class TesseractOCRService {
           if (onProgress && m) {
             let userMessage = m.status;
             if (m.status === 'loading tesseract core') userMessage = 'Loading WebAssembly OCR core...';
-            else if (m.status === 'loading language traineddata') userMessage = `Loading ${language} language model...`;
+            else if (m.status === 'loading language traineddata') {
+              userMessage = language.includes('guj') 
+                ? 'Loading Gujarati (ગુજરાતી) & English OCR language models...' 
+                : `Loading ${language} language model...`;
+            }
             else if (m.status === 'initializing api') userMessage = 'Initializing local OCR engine...';
-            else if (m.status === 'recognizing text') userMessage = 'Recognizing text patterns...';
+            else if (m.status === 'recognizing text') userMessage = 'Recognizing Gujarati & alphanumeric text patterns...';
 
             onProgress({
               status: m.status,
@@ -71,7 +76,7 @@ class TesseractOCRService {
   /**
    * Run local OCR on an image source (Canvas, Blob, or URL)
    */
-  async recognize(imageSource, { language = 'eng', onProgress = null } = {}) {
+  async recognize(imageSource, { language = 'guj+eng', onProgress = null } = {}) {
     const startTime = performance.now();
 
     const worker = await this.getWorker(language, onProgress);

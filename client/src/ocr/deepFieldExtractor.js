@@ -55,8 +55,8 @@ export function cleanOcrLine(line) {
 export function isGarbageLine(line) {
   if (!line || line.length < 2) return true;
   
-  // If line contains no letters or digits
-  const letters = line.replace(/[^A-Za-z0-9]/g, '');
+  // If line contains no letters or digits (supporting English, Gujarati \u0A80-\u0AFF, and Devanagari \u0900-\u097F)
+  const letters = line.replace(/[^A-Za-z0-9\u0A80-\u0AFF\u0900-\u097F]/g, '');
   if (letters.length < 2) return true;
   
   // Common icon, decorative borders and OCR noise patterns
@@ -67,7 +67,7 @@ export function isGarbageLine(line) {
   
   // If line is just random isolated single characters (e.g. "® re NG wea B) weer POF")
   const words = line.split(/\s+/).filter(Boolean);
-  const singleCharWords = words.filter(w => w.length === 1 && !/^[aAiI0-9]$/.test(w));
+  const singleCharWords = words.filter(w => w.length === 1 && !/^[aAiI0-9\u0A80-\u0AFF]$/.test(w));
   if (words.length >= 3 && (singleCharWords.length / words.length) > 0.45) return true;
   
   return false;
@@ -161,10 +161,10 @@ export function extractDocumentContentAndEntities(rawText) {
   // E. Detect Document Title / Header
   // Avoid lines that are just single words or status words
   const titleCandidate = rawLines.find(l => 
-    l.length >= 8 && 
-    l.length <= 65 && 
+    l.length >= 4 && 
+    l.length <= 75 && 
     !/^(?:Upload|Processing|Extracting|Review|Your data is safe|Supported formats)/i.test(l) &&
-    (/Review|Document|Invoice|Statement|Order|Certificate|Agreement|Report|Notice/i.test(l) || l.endsWith(':') || l.endsWith('-'))
+    (/Review|Document|Invoice|Statement|Order|Certificate|Agreement|Report|Notice|સમીક્ષા|દસ્તાવેજ|ઇન્વોઇસ|બિલ|સ્ટેટમેન્ટ|ઓર્ડર|પ્રમાણપત્ર|કરાર|અહેવાલ|નોટિસ|પહોંચ|રસીદ/i.test(l) || l.endsWith(':') || l.endsWith('-'))
   );
 
   let docTitle = titleCandidate ? titleCandidate.replace(/[:–—\s©-]+$/, '').trim() : '';
@@ -201,8 +201,8 @@ export function extractDocumentContentAndEntities(rawText) {
       verified: 1
     });
 
-    // Opening & Concluding sentences
-    const sentences = fullProseText.match(/[^.!?]+(?:[.!?]+|\s*$)/g) || [];
+    // Opening & Concluding sentences (supporting ., !, ?, and Indian purna viram । \u0964)
+    const sentences = fullProseText.match(/[^.!?।]+(?:[.!?।]+|\s*$)/g) || [];
     if (sentences.length >= 2) {
       fields.push({
         name: 'Opening Sentence',
@@ -317,8 +317,8 @@ export function extractAllKeyValuePairs(rawText) {
 
     for (const seg of segments) {
       const trimmed = cleanText(seg);
-      // Matches "Key : Value", "Key - Value", "Key = Value"
-      const match = trimmed.match(/^([A-Za-z0-9\s#&/()_.-]{2,35})[:=–—]\s*([^\n\r]+)$/);
+      // Matches "Key : Value", "Key - Value", "Key = Value" (supports English & Gujarati Unicode)
+      const match = trimmed.match(/^([A-Za-z0-9\u0A80-\u0AFF\u0900-\u097F\s#&/()_.-]{2,45})[:=–—]\s*([^\n\r]+)$/);
       if (match) {
         const key = cleanText(match[1]);
         const val = cleanText(match[2]);
@@ -355,19 +355,19 @@ export function extractFinancialsAndNumbers(rawText) {
   const financials = [];
 
   const financialPatterns = [
-    { name: 'Total Amount', category: 'Financial', regex: /(?:TOTAL\s*AMOUNT|GRAND\s*TOTAL|TOTAL\s*DUE|AMOUNT\s*PAYABLE|BALANCE\s*DUE|NET\s*PAYABLE|TOTAL)[:.\s]*([$€£₹¥]?\s*[0-9,]+\.[0-9]{2}|[$€£₹¥]?\s*[0-9,]+)/i },
-    { name: 'Subtotal', category: 'Financial', regex: /(?:SUBTOTAL|SUB-TOTAL|TAXABLE\s*AMOUNT|NET\s*AMOUNT)[:.\s]*([$€£₹¥]?\s*[0-9,]+\.[0-9]{2}|[$€£₹¥]?\s*[0-9,]+)/i },
-    { name: 'Tax / GST / VAT', category: 'Financial', regex: /(?:TAX|GST|VAT|CGST|SGST|IGST|SALES\s*TAX)(?:\s*\(\d+%\))?[:.\s]*([$€£₹¥]?\s*[0-9,]+\.[0-9]{2}|[$€£₹¥]?\s*[0-9,]+)/i },
-    { name: 'Discount', category: 'Financial', regex: /(?:DISCOUNT|LESS|SAVINGS|REBATE)[:.\s]*([$€£₹¥]?\s*[0-9,]+\.[0-9]{2}|[$€£₹¥]?\s*[0-9,]+)/i },
-    { name: 'Shipping / Freight', category: 'Financial', regex: /(?:SHIPPING|FREIGHT|DELIVERY\s*FEE|HANDLING)[:.\s]*([$€£₹¥]?\s*[0-9,]+\.[0-9]{2}|[$€£₹¥]?\s*[0-9,]+)/i },
-    { name: 'Opening Balance', category: 'Financial', regex: /(?:OPENING\s*BALANCE|PREVIOUS\s*BALANCE|BEGINNING\s*BALANCE)[:.\s]*([$€£₹¥]?\s*[0-9,]+\.[0-9]{2}|[$€£₹¥]?\s*[0-9,]+)/i },
-    { name: 'Closing Balance', category: 'Financial', regex: /(?:CLOSING\s*BALANCE|ENDING\s*BALANCE|NEW\s*BALANCE|AVAILABLE\s*BALANCE)[:.\s]*([$€£₹¥]?\s*[0-9,]+\.[0-9]{2}|[$€£₹¥]?\s*[0-9,]+)/i },
-    { name: 'Total Credits', category: 'Financial', regex: /(?:TOTAL\s*CREDITS?|DEPOSITS?)[:.\s]*([$€£₹¥]?\s*[0-9,]+\.[0-9]{2}|[$€£₹¥]?\s*[0-9,]+)/i },
-    { name: 'Total Debits', category: 'Financial', regex: /(?:TOTAL\s*DEBITS?|WITHDRAWALS?)[:.\s]*([$€£₹¥]?\s*[0-9,]+\.[0-9]{2}|[$€£₹¥]?\s*[0-9,]+)/i },
-    { name: 'Account / Card Number', category: 'Identifier', regex: /(?:ACCOUNT\s*(?:NO|NUMBER|#)|A\/C\s*NO|CARD\s*(?:NO|NUMBER|#))[:.\s]*([A-Z0-9\-\s*]{4,25})/i },
-    { name: 'Invoice / Bill Number', category: 'Identifier', regex: /(?:INVOICE\s*(?:NO|NUMBER|#)|BILL\s*(?:NO|NUMBER|#)|INV\s*(?:NO|NUMBER|#))[:.\s]*([A-Z0-9\-_/]{3,25})/i },
-    { name: 'Order / PO Number', category: 'Identifier', regex: /(?:ORDER\s*(?:NO|NUMBER|#)|P\.?O\.?\s*(?:NO|NUMBER|#)|PURCHASE\s*ORDER)[:.\s]*([A-Z0-9\-_/]{3,20})/i },
-    { name: 'Reference / Ref Number', category: 'Identifier', regex: /(?:REF\s*(?:NO|NUMBER|#)|REFERENCE\s*(?:NO|NUMBER|#)|TRACKING\s*(?:NO|NUMBER|#))[:.\s]*([A-Z0-9\-_/]{3,25})/i }
+    { name: 'Total Amount', category: 'Financial', regex: /(?:TOTAL\s*AMOUNT|GRAND\s*TOTAL|TOTAL\s*DUE|AMOUNT\s*PAYABLE|BALANCE\s*DUE|NET\s*PAYABLE|TOTAL|કુલ\s*રકમ|કુલ|ચૂકવવાપાત્ર|ચુકવવાપાત્ર\s*રકમ)[:.\s]*([$€£₹¥]?\s*[0-9,.]+|[$€£₹¥]?\s*[\u0AE6-\u0AEF,.]+)/i },
+    { name: 'Subtotal', category: 'Financial', regex: /(?:SUBTOTAL|SUB-TOTAL|TAXABLE\s*AMOUNT|NET\s*AMOUNT|પેટા\s*કુલ|કરપાત્ર\s*રકમ)[:.\s]*([$€£₹¥]?\s*[0-9,.]+|[$€£₹¥]?\s*[\u0AE6-\u0AEF,.]+)/i },
+    { name: 'Tax / GST / VAT', category: 'Financial', regex: /(?:TAX|GST|VAT|CGST|SGST|IGST|SALES\s*TAX|જીએસટી|કર|વેરો)(?:\s*\(\d+%\))?[:.\s]*([$€£₹¥]?\s*[0-9,.]+|[$€£₹¥]?\s*[\u0AE6-\u0AEF,.]+)/i },
+    { name: 'Discount', category: 'Financial', regex: /(?:DISCOUNT|LESS|SAVINGS|REBATE|વળતર|ડિસ્કાઉન્ટ|છૂટ)[:.\s]*([$€£₹¥]?\s*[0-9,.]+|[$€£₹¥]?\s*[\u0AE6-\u0AEF,.]+)/i },
+    { name: 'Shipping / Freight', category: 'Financial', regex: /(?:SHIPPING|FREIGHT|DELIVERY\s*FEE|HANDLING)[:.\s]*([$€£₹¥]?\s*[0-9,.]+|[$€£₹¥]?\s*[\u0AE6-\u0AEF,.]+)/i },
+    { name: 'Opening Balance', category: 'Financial', regex: /(?:OPENING\s*BALANCE|PREVIOUS\s*BALANCE|BEGINNING\s*BALANCE)[:.\s]*([$€£₹¥]?\s*[0-9,.]+|[$€£₹¥]?\s*[\u0AE6-\u0AEF,.]+)/i },
+    { name: 'Closing Balance', category: 'Financial', regex: /(?:CLOSING\s*BALANCE|ENDING\s*BALANCE|NEW\s*BALANCE|AVAILABLE\s*BALANCE|બાકી\s*રકમ)[:.\s]*([$€£₹¥]?\s*[0-9,.]+|[$€£₹¥]?\s*[\u0AE6-\u0AEF,.]+)/i },
+    { name: 'Total Credits', category: 'Financial', regex: /(?:TOTAL\s*CREDITS?|DEPOSITS?|જમા\s*રકમ|જમા)[:.\s]*([$€£₹¥]?\s*[0-9,.]+|[$€£₹¥]?\s*[\u0AE6-\u0AEF,.]+)/i },
+    { name: 'Total Debits', category: 'Financial', regex: /(?:TOTAL\s*DEBITS?|WITHDRAWALS?|ઉધાર\s*રકમ|ઉધાર)[:.\s]*([$€£₹¥]?\s*[0-9,.]+|[$€£₹¥]?\s*[\u0AE6-\u0AEF,.]+)/i },
+    { name: 'Account / Card Number', category: 'Identifier', regex: /(?:ACCOUNT\s*(?:NO|NUMBER|#)|A\/C\s*NO|CARD\s*(?:NO|NUMBER|#)|ખાતા\s*(?:નંબર|નં)|ખાતું)[:.\s]*([A-Za-z0-9\-\s*\u0AE6-\u0AEF]{4,25})/i },
+    { name: 'Invoice / Bill Number', category: 'Identifier', regex: /(?:INVOICE\s*(?:NO|NUMBER|#)|BILL\s*(?:NO|NUMBER|#)|INV\s*(?:NO|NUMBER|#)|બિલ\s*(?:નંબર|નં)|ઇન્વોઇસ\s*(?:નંબર|નં)|રસીદ\s*(?:નંબર|નં)|પહોંચ\s*(?:નંબર|નં))[:.\s]*([A-Za-z0-9\-_/\u0AE6-\u0AEF]{3,25})/i },
+    { name: 'Order / PO Number', category: 'Identifier', regex: /(?:ORDER\s*(?:NO|NUMBER|#)|P\.?O\.?\s*(?:NO|NUMBER|#)|PURCHASE\s*ORDER|ઓર્ડર\s*(?:નંબર|નં)|આદેશ\s*નં)[:.\s]*([A-Za-z0-9\-_/\u0AE6-\u0AEF]{3,20})/i },
+    { name: 'Reference / Ref Number', category: 'Identifier', regex: /(?:REF\s*(?:NO|NUMBER|#)|REFERENCE\s*(?:NO|NUMBER|#)|સંદર્ભ\s*(?:નંબર|નં))[:.\s]*([A-Za-z0-9\-_/\u0AE6-\u0AEF]{3,25})/i }
   ];
 
   for (const fp of financialPatterns) {
@@ -384,8 +384,8 @@ export function extractFinancialsAndNumbers(rawText) {
     }
   }
 
-  // Collect distinct monetary amounts found across document
-  const amountMatches = [...rawText.matchAll(/([$€£₹¥]\s*[0-9,]+\.[0-9]{2}|\b[0-9,]+\.[0-9]{2}\s*(?:USD|INR|EUR|GBP))/gi)];
+  // Collect distinct monetary amounts found across document (supporting ₹, Rs, INR, રૂ., રૂપિયા, and Gujarati digits)
+  const amountMatches = [...rawText.matchAll(/(?:[$€£₹¥]|રૂ\.|રૂપિયા)\s*[0-9,\u0AE6-\u0AEF]+(?:\.[0-9\u0AE6-\u0AEF]{2})?|\b[0-9,\u0AE6-\u0AEF]+(?:\.[0-9\u0AE6-\u0AEF]{2})?\s*(?:USD|INR|EUR|GBP|રૂપિયા|રૂ\.)/gi)];
   if (amountMatches.length > 0) {
     const uniqueAmounts = [...new Set(amountMatches.map(m => cleanText(m[0])))];
     financials.push({
@@ -406,8 +406,8 @@ export function extractAllDates(rawText) {
   const dates = [];
 
   const datePatterns = [
-    { name: 'Invoice / Document Date', regex: /(?:INVOICE\s*DATE|DOC\s*DATE|BILL\s*DATE|DATE\s*OF\s*ISSUE|ISSUED|DATE)[:.\s]*([0-9]{1,2}[./-][0-9]{1,2}[./-][0-9]{2,4}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4}|\d{4}[./-]\d{1,2}[./-]\d{1,2})/i },
-    { name: 'Due / Expiry Date', regex: /(?:DUE\s*DATE|PAYMENT\s*DUE|EXPIRY\s*DATE|VALID\s*TILL|EXPIRES?)[:.\s]*([0-9]{1,2}[./-][0-9]{1,2}[./-][0-9]{2,4}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4}|\d{4}[./-]\d{1,2}[./-]\d{1,2})/i },
+    { name: 'Invoice / Document Date', regex: /(?:INVOICE\s*DATE|DOC\s*DATE|BILL\s*DATE|DATE\s*OF\s*ISSUE|ISSUED|DATE|તારીખ|દિનાંક)[:.\s]*([0-9\u0AE6-\u0AEF]{1,2}[./-][0-9\u0AE6-\u0AEF]{1,2}[./-][0-9\u0AE6-\u0AEF]{2,4}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4}|\d{4}[./-]\d{1,2}[./-]\d{1,2})/i },
+    { name: 'Due / Expiry Date', regex: /(?:DUE\s*DATE|PAYMENT\s*DUE|EXPIRY\s*DATE|VALID\s*TILL|EXPIRES?|અંતિમ\s*તારીખ|મુદત)[:.\s]*([0-9\u0AE6-\u0AEF]{1,2}[./-][0-9\u0AE6-\u0AEF]{1,2}[./-][0-9\u0AE6-\u0AEF]{2,4}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4}|\d{4}[./-]\d{1,2}[./-]\d{1,2})/i },
     { name: 'Statement Period', regex: /(?:STATEMENT\s*PERIOD|PERIOD|BILLING\s*PERIOD|CYCLE)[:.\s]*([^\n\r]+)/i },
     { name: 'Delivery / Shipping Date', regex: /(?:DELIVERY\s*DATE|SHIPPED\s*ON|ESTIMATED\s*DELIVERY)[:.\s]*([0-9]{1,2}[./-][0-9]{1,2}[./-][0-9]{2,4}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4})/i }
   ];
@@ -462,15 +462,15 @@ export function extractContactsAndIdentifiers(rawText) {
     });
   }
 
-  // Phone Numbers
-  const phones = [...new Set(rawText.match(/(?:\+?\d{1,4}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g) || [])];
+  // Phone Numbers (supports Indian 10-digit formats like 98250 12345, +91 98250 12345, and standard international formats)
+  const phones = [...new Set(rawText.match(/(?:\+?91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}\b|\b[6-9]\d{9}\b|(?:\+?\d{1,4}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g) || [])];
   if (phones.length > 0) {
     entities.push({
       name: 'Phone Number(s)',
       value: phones.slice(0, 4).join(', '),
       type: 'phone',
       category: 'Contact',
-      confidence: 0.88,
+      confidence: 0.92,
       verified: 0
     });
   }
@@ -514,20 +514,33 @@ export function extractContactsAndIdentifiers(rawText) {
     });
   }
 
-  // Postal / Address line
+  // Customer / Client Name
+  const customerMatch = rawText.match(/(?:CUSTOMER\s*NAME|BILL\s*TO|CLIENT\s*NAME|ગ્રાહકનું\s*નામ|ગ્રાહક|શ્રીમાન)[:.\s]*([A-Za-z\u0A80-\u0AFF\u0900-\u097F\s.()'-]{2,50})/i);
+  if (customerMatch) {
+    entities.push({
+      name: 'Customer / Client Name',
+      value: cleanText(customerMatch[1]),
+      type: 'string',
+      category: 'Contact',
+      confidence: 0.94,
+      verified: 0
+    });
+  }
+
+  // Postal / Address line (supports English and Gujarati landmarks/streets)
   const lines = rawText.split('\n')
     .map(cleanOcrLine)
     .filter(l => !isGarbageLine(l));
 
   for (const line of lines) {
-    if (/(?:P\.?O\.?\s*Box|Street|Road|Avenue|Lane|Sector|Nagar|Floor|Suite|Bldg|Postal|Zip|Pin\s*Code)\b/i.test(line)) {
-      if (line.length >= 10 && line.length <= 100) {
+    if (/(?:P\.?O\.?\s*Box|Street|Road|Avenue|Lane|Sector|Nagar|Floor|Suite|Bldg|Postal|Zip|Pin\s*Code|રોડ|માર્ગ|સોસાયટી|નગર|વિસ્તાર|પ્લોટ|શેરી|માર્કેટ)\b/i.test(line)) {
+      if (line.length >= 8 && line.length <= 120) {
         entities.push({
           name: 'Address / Location',
           value: line,
           type: 'address',
           category: 'Contact',
-          confidence: 0.85,
+          confidence: 0.88,
           verified: 0
         });
         break;
@@ -538,24 +551,24 @@ export function extractContactsAndIdentifiers(rawText) {
   return entities;
 }
 
-// 6. Intelligent Table & Line Items Parser (handles invoices, orders, receipts, and bank statement rows)
+// 6. Intelligent Table & Line Items Parser (handles invoices, orders, receipts, Gujarati bills, and bank statement rows)
 export function extractLineItemsTable(rawText) {
   const lineItems = [];
   const lines = rawText.split('\n')
     .map(cleanOcrLine)
     .filter(l => !isGarbageLine(l));
 
-  // Pattern 1: Description ... Qty ... UnitPrice ... TotalAmount
-  const itemPattern1 = /^([A-Za-z0-9\s#&/()._-]{3,40})\s+(\d+)\s+([$€£₹¥]?\s*[0-9,]+(?:\.[0-9]{2})?)\s+([$€£₹¥]?\s*[0-9,]+(?:\.[0-9]{2})?)$/;
+  // Pattern 1: Description ... Qty ... UnitPrice ... TotalAmount (Supports Latin and Gujarati script & numerals)
+  const itemPattern1 = /^([A-Za-z0-9\u0A80-\u0AFF\u0900-\u097F\s#&/()._-]{2,50})\s+([0-9\u0AE6-\u0AEF]+)\s+([$€£₹¥]?\s*[0-9,\u0AE6-\u0AEF]+(?:\.[0-9\u0AE6-\u0AEF]{2})?)\s+([$€£₹¥]?\s*[0-9,\u0AE6-\u0AEF]+(?:\.[0-9\u0AE6-\u0AEF]{2})?)$/;
   
   // Pattern 2: Description ... Amount
-  const itemPattern2 = /^([A-Za-z\s#&/()._-]{3,40})\s+([$€£₹¥]\s*[0-9,]+(?:\.[0-9]{2})?)$/;
+  const itemPattern2 = /^([A-Za-z0-9\u0A80-\u0AFF\u0900-\u097F\s#&/()._-]{2,50})\s+([$€£₹¥]?\s*[0-9,\u0AE6-\u0AEF]+(?:\.[0-9\u0AE6-\u0AEF]{2})?)$/;
 
   // Pattern 3: Statement transaction row (Date ... Description ... Amount ... Balance)
-  const itemPattern3 = /^(\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?)\s+([A-Za-z0-9\s#&/()._-]{3,35})\s+([$€£₹¥]?\s*[0-9,]+(?:\.[0-9]{2})?)(?:\s+([$€£₹¥]?\s*[0-9,]+(?:\.[0-9]{2})?))?$/;
+  const itemPattern3 = /^([0-9\u0AE6-\u0AEF]{1,2}[./-][0-9\u0AE6-\u0AEF]{1,2}(?:[./-][0-9\u0AE6-\u0AEF]{2,4})?)\s+([A-Za-z0-9\u0A80-\u0AFF\u0900-\u097F\s#&/()._-]{3,40})\s+([$€£₹¥]?\s*[0-9,\u0AE6-\u0AEF]+(?:\.[0-9\u0AE6-\u0AEF]{2})?)(?:\s+([$€£₹¥]?\s*[0-9,\u0AE6-\u0AEF]+(?:\.[0-9\u0AE6-\u0AEF]{2})?))?$/;
 
   for (const line of lines) {
-    if (/TOTAL|SUBTOTAL|TAX|INVOICE|DUE|BALANCE|PAYMENT|DISCOUNT|TERMS|PAGE|THANK|STATEMENT/i.test(line)) {
+    if (/TOTAL|SUBTOTAL|TAX|INVOICE|DUE|BALANCE|PAYMENT|DISCOUNT|TERMS|PAGE|THANK|STATEMENT|કુલ|પેટા|જીએસટી|આભાર|વેરો|કરપાત્ર|રસીદ|બિલ/i.test(line)) {
       continue;
     }
 

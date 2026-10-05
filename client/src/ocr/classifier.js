@@ -46,7 +46,8 @@ const CLASSIFIERS = [
         'STATEMENT OF ACCOUNT', 'ACCOUNT STATEMENT', 'BANK STATEMENT',
         'OPENING BALANCE', 'CLOSING BALANCE', 'AVAILABLE BALANCE',
         'TOTAL CREDITS', 'TOTAL DEBITS', 'TRANSACTION HISTORY',
-        'ACCOUNT NUMBER', 'A/C NO', 'WITHDRAWAL', 'DEPOSIT', 'STATEMENT PERIOD'
+        'ACCOUNT NUMBER', 'A/C NO', 'WITHDRAWAL', 'DEPOSIT', 'STATEMENT PERIOD',
+        'સ્ટેટમેન્ટ', 'ખાતા વિગત', 'બેંક સ્ટેટમેન્ટ', 'જમા', 'ઉધાર', 'બાકી રકમ', 'ખાતા નંબર'
       ];
 
       keywords.forEach(kw => {
@@ -70,7 +71,8 @@ const CLASSIFIERS = [
       const keywords = [
         'PURCHASE ORDER', 'P.O. NUMBER', 'PO NUMBER', 'P.O. NO',
         'ORDER DATE', 'SALES ORDER', 'ORDER NUMBER', 'SHIP TO',
-        'VENDOR', 'DELIVERY DATE', 'ITEM DESCRIPTION', 'ORDERED BY'
+        'VENDOR', 'DELIVERY DATE', 'ITEM DESCRIPTION', 'ORDERED BY',
+        'ઓર્ડર', 'આદેશ', 'ખરીદ આદેશ', 'ઓર્ડર નંબર', 'ઓર્ડર તારીખ'
       ];
 
       keywords.forEach(kw => {
@@ -93,12 +95,14 @@ const CLASSIFIERS = [
 
       const strongKeywords = [
         'INVOICE', 'TAX INVOICE', 'BILL TO', 'INVOICE NUMBER',
-        'INV NO', 'INVOICE DATE', 'DUE DATE', 'SUBTOTAL', 'GSTIN', 'VAT NO'
+        'INV NO', 'INVOICE DATE', 'DUE DATE', 'SUBTOTAL', 'GSTIN', 'VAT NO',
+        'બિલ', 'ઇન્વોઇસ', 'કર ઇન્વોઇસ', 'જીએસટી', 'કુલ રકમ'
       ];
 
       const secondaryKeywords = [
         'TOTAL AMOUNT', 'BALANCE DUE', 'QUANTITY', 'UNIT PRICE',
-        'RATE', 'HSN', 'TAXABLE AMOUNT', 'DISCOUNT', 'TERMS & CONDITIONS'
+        'RATE', 'HSN', 'TAXABLE AMOUNT', 'DISCOUNT', 'TERMS & CONDITIONS',
+        'પેટા કુલ', 'કરપાત્ર રકમ', 'વળતર', 'ચુકવણી'
       ];
 
       strongKeywords.forEach(kw => {
@@ -129,7 +133,8 @@ const CLASSIFIERS = [
       const keywords = [
         'RECEIPT', 'CASHIER', 'CHANGE DUE', 'TOTAL',
         'SUBTOTAL', 'STORE #', 'TERMINAL', 'ITEMS',
-        'CASH', 'CREDIT CARD', 'VISA', 'MASTERCARD', 'THANK YOU FOR SHOPPING'
+        'CASH', 'CREDIT CARD', 'VISA', 'MASTERCARD', 'THANK YOU FOR SHOPPING',
+        'રસીદ', 'પહોંચ', 'કેશિયર', 'રોકડ', 'દુકાન', 'સુપર સ્ટોર', 'ગ્રાહક'
       ];
 
       keywords.forEach(kw => {
@@ -154,7 +159,8 @@ const CLASSIFIERS = [
         'IDENTITY CARD', 'DRIVING LICENCE', 'DRIVING LICENSE',
         'NATIONAL ID', 'PERMANENT ACCOUNT NUMBER', 'INCOME TAX DEPARTMENT',
         'AADHAAR', 'VOTER ID', 'ELECTION COMMISSION', 'DATE OF BIRTH', 'DOB',
-        'FATHER', 'HUSBAND', 'VALID TILL'
+        'FATHER', 'HUSBAND', 'VALID TILL',
+        'ઓળખપત્ર', 'ચૂંટણી કાર્ડ', 'આધાર', 'ડ્રાઇવિંગ લાયસન્સ', 'જન્મ તારીખ'
       ];
 
       keywords.forEach(kw => {
@@ -178,7 +184,8 @@ const CLASSIFIERS = [
       const keywords = [
         'THIS IS TO CERTIFY', 'CERTIFICATE OF', 'HAS SUCCESSFULLY COMPLETED',
         'AWARDED TO', 'IN RECOGNITION OF', 'HONOR OF', 'DATE OF CONFERRAL',
-        'AUTHORIZED SIGNATORY'
+        'AUTHORIZED SIGNATORY',
+        'પ્રમાણપત્ર', 'પ્રમાણિત કરવામાં આવે છે', 'સન્માન પત્ર'
       ];
 
       keywords.forEach(kw => {
@@ -202,7 +209,8 @@ const CLASSIFIERS = [
       const keywords = [
         'PLAY REVIEW', 'BOOK REVIEW', 'PARAGRAPH', 'SHAKESPEARE',
         'THEATRE', 'THEATER', 'COMEDIES', 'TRAGEDY', 'ESSAY',
-        'ARTICLE', 'REPORT', 'STORY', 'PERFORMANCE', 'NOVEL', 'AUTHOR'
+        'ARTICLE', 'REPORT', 'STORY', 'PERFORMANCE', 'NOVEL', 'AUTHOR',
+        'સમીક્ષા', 'નાટક', 'પુસ્તક', 'વાર્તા', 'લેખ', 'સાહિત્ય'
       ];
 
       keywords.forEach(kw => {

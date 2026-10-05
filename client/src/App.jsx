@@ -32,6 +32,7 @@ export function App() {
   const [previewUrl, setPreviewUrl] = useState(null);
 
   // OCR & Deep Extraction State
+  const [ocrLanguage, setOcrLanguage] = useState('guj+eng');
   const [isProcessing, setIsProcessing] = useState(false);
   const [progressState, setProgressState] = useState({ progress: 0, message: 'Initializing local engine...' });
   const [rawOcrText, setRawOcrText] = useState('');
@@ -126,7 +127,7 @@ export function App() {
       const imageForOcr = preprocessed.canvas || preprocessed.processedBlob || file;
 
       const ocrResult = await ocrService.recognize(imageForOcr, {
-        language: 'eng',
+        language: ocrLanguage,
         onProgress: (p) => {
           const scaledProgress = 0.45 + (p.progress || 0.1) * 0.4;
           setProgressState({
@@ -555,6 +556,8 @@ export function App() {
             onFileSelected={handleFileSelected}
             onProcess={startProcessing}
             isProcessing={isProcessing}
+            ocrLanguage={ocrLanguage}
+            onLanguageChange={setOcrLanguage}
           />
         )}
 
@@ -651,6 +654,9 @@ export function App() {
                   </span>
                   <span style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', background: '#f1f5f9', padding: '4px 10px', borderRadius: '8px' }}>
                     {extractedFields.length} Fields • {paragraphs.length} Paragraphs • {textLines.length} Lines
+                  </span>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f766e', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '4px 10px', borderRadius: '8px' }}>
+                    {ocrLanguage === 'guj+eng' ? '🌐 ગુજરાતી + English' : ocrLanguage === 'guj' ? '🇮🇳 ગુજરાતી' : ocrLanguage === 'hin+eng' ? '🇮🇳 हिन्दी + Eng' : '🇬🇧 English'}
                   </span>
                 </div>
               </div>

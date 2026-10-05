@@ -21,11 +21,13 @@ yarn-error.log*
 
 # SQLite databases & temp uploads
 *.sqlite
-*.sqlite-journal
+*.sqlite-*
 server/storage/uploads/*
 !server/storage/uploads/.gitkeep
-server/data/*.sqlite
-server/data/*.sqlite-journal
+server/data/*.sqlite*
+
+# Tesseract trained data language models
+*.traineddata
 
 # Temporary scratch and debug scripts
 scratch/

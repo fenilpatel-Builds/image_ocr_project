@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { FolderOpen, CheckCircle2, AlertCircle, RefreshCw, X, Image as ImageIcon, FileText, ArrowRight, Sparkles } from 'lucide-react';
+import { generateSampleGujaratiBill } from '../ocr/syntheticSamples';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.pdf'];
@@ -11,11 +12,18 @@ const ALLOWED_MIME_TYPES = [
   'application/pdf'
 ];
 
-export function DocumentUpload({ onFileSelected, onProcess, isProcessing }) {
+export function DocumentUpload({ 
+  onFileSelected, 
+  onProcess, 
+  isProcessing,
+  ocrLanguage = 'guj+eng',
+  onLanguageChange
+}) {
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [validationError, setValidationError] = useState(null);
+  const [isLoadingSample, setIsLoadingSample] = useState(false);
 
   // Validate file against format and size constraints
   const validateFile = (file) => {
@@ -89,6 +97,21 @@ export function DocumentUpload({ onFileSelected, onProcess, isProcessing }) {
     }
   };
 
+  const handleLoadGujaratiSample = async (e) => {
+    if (e) e.stopPropagation();
+    try {
+      setIsLoadingSample(true);
+      const sampleFile = await generateSampleGujaratiBill();
+      setSelectedFile(sampleFile);
+      if (onLanguageChange) onLanguageChange('guj+eng');
+      if (onFileSelected) onFileSelected(sampleFile);
+    } catch (err) {
+      console.error('Failed to generate Gujarati sample bill:', err);
+    } finally {
+      setIsLoadingSample(false);
+    }
+  };
+
   const handleClearFile = (e) => {
     if (e) e.stopPropagation();
     setSelectedFile(null);
@@ -120,8 +143,73 @@ export function DocumentUpload({ onFileSelected, onProcess, isProcessing }) {
       <span className="doc-section-label">DOCUMENT UPLOAD</span>
       <h1 className="doc-main-heading">Upload Your Document</h1>
       <p className="doc-sub-text">
-        Drag and drop your file here, or choose from your device.
+        Drag and drop your file here, or choose from your device. Supports English and Gujarati (ગુજરાતી) documents.
       </p>
+
+      {/* OCR Language & Fast Sample Action Bar */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '12px',
+        padding: '10px 16px',
+        background: '#f8fafc',
+        border: '1.5px solid #e2e8f0',
+        borderRadius: '12px',
+        marginBottom: '16px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>
+            OCR Engine Language:
+          </span>
+          <select
+            value={ocrLanguage || 'guj+eng'}
+            onChange={(e) => onLanguageChange && onLanguageChange(e.target.value)}
+            disabled={isProcessing}
+            style={{
+              padding: '6px 12px',
+              borderRadius: '8px',
+              border: '1.5px solid #cbd5e1',
+              background: '#ffffff',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#0f172a',
+              cursor: 'pointer',
+              outline: 'none'
+            }}
+          >
+            <option value="guj+eng">🌐 ગુજરાતી + English (Bilingual - Best Accuracy)</option>
+            <option value="guj">🇮🇳 ગુજરાતી માત્ર (Gujarati Only)</option>
+            <option value="eng">🇬🇧 English Only</option>
+            <option value="hin+eng">🇮🇳 हिन्दी + English (Hindi + English)</option>
+          </select>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleLoadGujaratiSample}
+          disabled={isProcessing || isLoadingSample}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '7px 14px',
+            borderRadius: '8px',
+            border: '1.5px solid #16a34a',
+            background: '#f0fdf4',
+            color: '#15803d',
+            fontSize: '13px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+          title="Load pre-rendered Gujarati Retail Tax Invoice to test OCR scanning immediately"
+        >
+          <Sparkles size={14} color="#16a34a" />
+          <span>{isLoadingSample ? 'Generating Bill...' : 'Try Sample Gujarati Bill (ગુજરાતી બિલ)'}</span>
+        </button>
+      </div>
 
       {/* Real Hidden File Input (Strictly Invisible) */}
       <input
@@ -200,7 +288,7 @@ export function DocumentUpload({ onFileSelected, onProcess, isProcessing }) {
               or choose from your device
             </div>
 
-            {/* Single Primary Browse Button (Camera removed as requested) */}
+            {/* Single Primary Browse Button & Gujarati Sample */}
             <div className="doc-btn-group" onClick={(e) => e.stopPropagation()}>
               <button
                 type="button"
@@ -209,6 +297,16 @@ export function DocumentUpload({ onFileSelected, onProcess, isProcessing }) {
               >
                 <FolderOpen size={16} />
                 <span>Browse Files</span>
+              </button>
+
+              <button
+                type="button"
+                className="btn-sample-guj"
+                onClick={handleLoadGujaratiSample}
+                disabled={isLoadingSample}
+              >
+                <Sparkles size={16} color="#15803d" />
+                <span>Sample Gujarati Bill (ગુજરાતી)</span>
               </button>
             </div>
 
@@ -271,6 +369,23 @@ export function DocumentUpload({ onFileSelected, onProcess, isProcessing }) {
                 </span>
                 <span>•</span>
                 <span style={{ color: '#16a34a', fontWeight: 600 }}>Ready to Process</span>
+              </div>
+              <div style={{ marginTop: '8px' }}>
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '3px 10px',
+                  borderRadius: '20px',
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: '#15803d'
+                }}>
+                  <span>Language:</span>
+                  <strong>{ocrLanguage === 'guj+eng' ? '🌐 ગુજરાતી + English (Bilingual)' : ocrLanguage === 'guj' ? '🇮🇳 ગુજરાતી માત્ર' : ocrLanguage === 'hin+eng' ? '🇮🇳 हिन्दी + English' : '🇬🇧 English'}</strong>
+                </span>
               </div>
             </div>
 
