@@ -24,7 +24,9 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     engine: 'Local Tesseract.js (Client-Side WASM)',
+    multilingual: 'Automatic (English, Gujarati, Hindi)',
     database: 'SQLite (Node.js native)',
+    author: 'Fenil Patel (https://github.com/fenilpatel-Builds)',
     timestamp: new Date().toISOString()
   });
 });
