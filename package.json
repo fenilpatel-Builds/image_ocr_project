@@ -15,6 +15,6 @@
     "concurrently": "^9.1.2",
     "jimp": "^0.22.12"
   },
-  "author": "Harshit",
+  "author": "Fenil Patel <fenil8918@gmail.com> (https://github.com/fenilpatel-Builds)",
   "license": "MIT"
 }
